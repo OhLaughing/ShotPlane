@@ -4,10 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.*;
-import java.util.List;
 
 public class ShotPlaneFrame extends JFrame {
     private JPanel controlPanel;
@@ -15,18 +12,15 @@ public class ShotPlaneFrame extends JFrame {
     private JPanel playPanel;
     private static final int DEFAULT_WIDTH = 500;
     private static final int DEFAULT_HEIGHT = 400;
-    private Plane plane = new Plane(3, 3, 3, 6);
-    private JComponent displayComponent;
-    private JComponent play;
-
+    private Plane plane = new Plane(3, 3, 6, 3);
+    private ShotPlaneDisplayConponent displayComponent;
 
     public ShotPlaneFrame() {
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         displayPanel = new JPanel();
         playPanel = new JPanel();
-        displayComponent = new PutPlaneConponent();
+        displayComponent = new ShotPlaneDisplayConponent(plane);
 
-//        ShotPlaneDisplayConponent conponent = new ShotPlaneDisplayConponent(plane);
         displayPanel.add(displayComponent);
 
         controlPanel = new JPanel();
@@ -74,53 +68,6 @@ public class ShotPlaneFrame extends JFrame {
         controlPanel.add(rotatePanel);
     }
 
-    private class PutPlaneConponent extends JComponent {
-        private static final int DEFAULT_WIDTH = 300;
-        private static final int DEFAULT_HEIGHT = 291;
-        private List<Line2D> line2DList = null;
-        Graphics2D g2;
-
-        public PutPlaneConponent() {
-            line2DList = new ArrayList<>();
-            for (int i = 0; i < 15; i++) {
-                line2DList.add(new Line2D.Double(10, 10 + i * 20, 290, 10 + i * 20));
-                line2DList.add(new Line2D.Double(10 + i * 20, 10, 10 + i * 20, 290));
-            }
-        }
-
-        public void paintComponent(Graphics g) {
-            g2 = (Graphics2D) g;
-
-            for (Line2D line : line2DList)
-                g2.draw(line);
-            drawPlane(plane);
-        }
-
-        private void drawPlane(Plane plane) {
-            List<Rectangle2D> list = new ArrayList<>();
-            Point head = plane.getHead();
-            Point tail = plane.getTail();
-            if (head.getX() == tail.getX()) {
-                list.add(new Rectangle2D.Double(20 * head.getX() + 10, 20 * head.getY() + 10, 20, 20));
-                for (int j = (int) (head.getX() - 2); j <= head.getX() + 2; j++) {
-                    list.add(new Rectangle2D.Double(20 * j + 10, 20 * head.getY() + 30, 20, 20));
-                }
-            }
-            if (head.getY() == tail.getY()) {
-                list.add(new Rectangle2D.Double(20 * head.getX(), 20 * head.getY(), 20, 20));
-            }
-            for (Rectangle2D r : list) {
-                g2.setPaint(Color.BLUE);
-                g2.fill(r);
-                g2.setPaint(Color.WHITE);
-            }
-        }
-
-        public Dimension getPreferredSize() {
-            return new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-        }
-    }
-
     private class MoveAction implements ActionListener {
         public void actionPerformed(ActionEvent event) {
             String input = event.getActionCommand();
@@ -128,14 +75,88 @@ public class ShotPlaneFrame extends JFrame {
             if ("Left".equals(input)) {
                 Point head = plane.getHead();
                 Point tail = plane.getTail();
-                plane = new Plane(head.getX() - 1, head.getY(), tail.getX() - 1, tail.getY());
+                boolean e1 = head.getX() == tail.getX() && head.getX() > 2;
+                boolean e2 = head.getY() == tail.getY() && head.getX() > 0 && tail.getX() > 0;
+                if (e1 | e2) {
+                    plane = new Plane(head.getX() - 1, head.getY(), tail.getX() - 1, tail.getY());
+                    displayComponent.setPlane(plane);
+                    displayComponent.repaint();
+                }
+            }
+            if ("Right".equals(input)) {
+                Point head = plane.getHead();
+                Point tail = plane.getTail();
+                boolean e1 = head.getX() == tail.getX() && head.getX() < 11;
+                boolean e2 = head.getY() == tail.getY() && head.getX() < 13 && tail.getX() < 13;
+                if (e1 | e2) {
+                    plane = new Plane(head.getX() + 1, head.getY(), tail.getX() + 1, tail.getY());
+                    displayComponent.setPlane(plane);
+                    displayComponent.repaint();
+                }
+            }
+            if ("Up".equals(input)) {
+                Point head = plane.getHead();
+                Point tail = plane.getTail();
+                boolean e1 = head.getX() == tail.getX() && head.getY() > 0 && tail.getY() > 0;
+                boolean e2 = head.getY() == tail.getY() && head.getY() > 2;
+                if (e1 | e2) {
+                    plane = new Plane(head.getX(), head.getY() - 1, tail.getX(), tail.getY() - 1);
+                    displayComponent.setPlane(plane);
+                    displayComponent.repaint();
+                }
+            }
+            if ("Down".equals(input)) {
+                Point head = plane.getHead();
+                Point tail = plane.getTail();
+                boolean e1 = head.getX() == tail.getX() && head.getY() < 13 && tail.getY() < 13;
+                boolean e2 = head.getY() == tail.getY() && head.getY() < 11;
+                if (e1 | e2) {
+                    plane = new Plane(head.getX(), head.getY() + 1, tail.getX(), tail.getY() + 1);
+                    displayComponent.setPlane(plane);
+                    displayComponent.repaint();
+                }
+            }
+            if ("<<".equals(input)) {
+                Point head = plane.getHead();
+                Point tail = plane.getTail();
+                if (head.getX() == tail.getX() && head.getY() < tail.getY()) {
+                    double x1 = head.getX() - 1;
+                    double y = head.getY() + 1;
+                    double x2 = tail.getX() +1;
+                    if (y == 1) y++;
+                    plane = new Plane(x1, y, x2, y);
+                } else if (head.getX() == tail.getX() && head.getY() > tail.getY()) {
+                    double x1 = head.getX() + 1;
+                    double y = head.getY() - 1;
+                    double x2 = tail.getX() - 2;
+                    if (y == 12) y--;
+                    plane = new Plane(x1, y, x2, y);
+                } else if (head.getY() == tail.getY() && head.getX() > tail.getX()) {
+                    double x = head.getX() - 1;
+                    double y1 = head.getY() - 1;
+                    double y2 = tail.getY() + 2;
+                    if (x == 12) x--;
+                    plane = new Plane(x, y1, x, y2);
+                } else if (head.getY() == tail.getY() && head.getX() < tail.getX()) {
+                    System.out.println("hh");
+                    double x = head.getX() + 1;
+                    double y1 = head.getY() + 1;
+                    double y2 = tail.getY() - 2;
+                    if (x == 1) x++;
+                    plane = new Plane(x, y1, x, y2);
+                }
+                displayComponent.setPlane(plane);
                 displayComponent.repaint();
             }
             if ("OK".equals(input)) {
-                play = new ShotPlaneDisplayConponent(plane);
-                playPanel.add(play);
-                add(playPanel, BorderLayout.CENTER);
-                System.out.println("come");
+                for (int i = 0; i < 14; i++) {
+                    for (int j = 0; j < 14; j++) {
+                        Rectangle2D rectangle2D = new Rectangle(10 + i * 20, 10 + j * 20, 20, 20);
+                        displayComponent.addSquare(rectangle2D, new Color(54, 63, 61));
+                    }
+                }
+                displayComponent.disablePlane();
+                displayComponent.repaint();
             }
         }
     }
