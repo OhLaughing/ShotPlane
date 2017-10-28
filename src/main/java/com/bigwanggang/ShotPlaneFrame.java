@@ -122,7 +122,7 @@ public class ShotPlaneFrame extends JFrame {
                 if (head.getX() == tail.getX() && head.getY() < tail.getY()) {
                     double x1 = head.getX() - 1;
                     double y = head.getY() + 1;
-                    double x2 = tail.getX() +1;
+                    double x2 = tail.getX() + 1;
                     if (y == 1) y++;
                     plane = new Plane(x1, y, x2, y);
                 } else if (head.getX() == tail.getX() && head.getY() > tail.getY()) {
@@ -143,6 +143,37 @@ public class ShotPlaneFrame extends JFrame {
                     double y1 = head.getY() + 1;
                     double y2 = tail.getY() - 2;
                     if (x == 1) x++;
+                    plane = new Plane(x, y1, x, y2);
+                }
+                displayComponent.setPlane(plane);
+                displayComponent.repaint();
+            }
+            if (">>".equals(input)) {
+                Point head = plane.getHead();
+                Point tail = plane.getTail();
+                if (head.getX() == tail.getX() && head.getY() > tail.getY()) {
+                    double x1 = head.getX() - 1;
+                    double y = head.getY() - 1;
+                    double x2 = tail.getX() + 2;
+                    if (y == 12) y--;
+                    plane = new Plane(x1, y, x2, y);
+                } else if (head.getX() == tail.getX() && head.getY() < tail.getY()) {
+                    double x1 = head.getX() + 1;
+                    double y = head.getY() + 1;
+                    double x2 = tail.getX() - 2;
+                    if (y == 1) y++;
+                    plane = new Plane(x1, y, x2, y);
+                } else if (head.getY() == tail.getY() && head.getX() < tail.getX()) {
+                    double x = head.getX() + 1;
+                    double y1 = head.getY() - 1;
+                    double y2 = tail.getY() + 2;
+                    if (x == 1) x++;
+                    plane = new Plane(x, y1, x, y2);
+                } else if (head.getY() == tail.getY() && head.getX() > tail.getX()) {
+                    double x = head.getX() - 1;
+                    double y1 = head.getY() + 1;
+                    double y2 = tail.getY() - 2;
+                    if (x == 12) x--;
                     plane = new Plane(x, y1, x, y2);
                 }
                 displayComponent.setPlane(plane);
