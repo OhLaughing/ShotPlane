@@ -12,7 +12,7 @@ public class ShotPlaneFrame extends JFrame {
     private JPanel playPanel;
     private static final int DEFAULT_WIDTH = 500;
     private static final int DEFAULT_HEIGHT = 400;
-    private Plane plane = new Plane(3, 3, 6, 3);
+    private Plane plane = new Plane(6, 5, 6, 8);
     private ShotPlaneDisplayConponent displayComponent;
 
     public ShotPlaneFrame() {

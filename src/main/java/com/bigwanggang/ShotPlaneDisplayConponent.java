@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class ShotPlaneDisplayConponent extends JComponent {
     private static final int DEFAULT_WIDTH = 300;
-    private static final int DEFAULT_HEIGHT = 290;
+    private static final int DEFAULT_HEIGHT = 291;
     private List<Line2D> line2DList = null;
     private Map<Rectangle2D, Color> squares;
     Graphics2D g2;
