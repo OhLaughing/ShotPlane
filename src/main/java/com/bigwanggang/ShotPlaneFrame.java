@@ -14,6 +14,8 @@ public class ShotPlaneFrame extends JFrame {
     private static final int DEFAULT_HEIGHT = 400;
     private Plane plane = new Plane(6, 5, 6, 8);
     private ShotPlaneDisplayConponent displayComponent;
+    private JTextField ipField;
+    private JTextField portField;
 
     public ShotPlaneFrame() {
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -27,7 +29,7 @@ public class ShotPlaneFrame extends JFrame {
         controlPanelInit(controlPanel);
         add(displayPanel, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.EAST);
-//        setResizable(false);
+        setResizable(false);
     }
 
     private void controlPanelInit(JPanel controlPanel) {
@@ -39,7 +41,7 @@ public class ShotPlaneFrame extends JFrame {
         JButton downButton = new JButton("Down");
         JButton rightButton = new JButton("Right");
         JButton okButton = new JButton("OK");
-        ActionListener moveListener = new MoveAction();
+        ActionListener moveListener = new ButtonAction();
         leftButton.addActionListener(moveListener);
         upButton.addActionListener(moveListener);
         downButton.addActionListener(moveListener);
@@ -65,10 +67,41 @@ public class ShotPlaneFrame extends JFrame {
         rotate2.addActionListener(moveListener);
         rotatePanel.add(rotate1);
         rotatePanel.add(rotate2);
+
         controlPanel.add(rotatePanel);
+        ipField = new JTextField(10);
+//        ipPoint.setEnabled(false);
+        portField = new JTextField(3);
+        JPanel ipPanel = new JPanel();
+        GridBagLayout layout = new GridBagLayout();
+        ipPanel.setLayout(layout);
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.weightx = 10;
+        constraints.weighty = 10;
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.gridwidth = 2;
+        constraints.gridheight = 1;
+        JLabel ipLabel = new JLabel("IP:", SwingConstants.RIGHT);
+        ipPanel.add(ipLabel, constraints);
+        JLabel portLabel = new JLabel("Port:", SwingConstants.RIGHT);
+        ipPanel.add(portLabel, constraints);
+        ipPanel.add(ipLabel);
+        ipPanel.add(ipField);
+        ipPanel.add(portLabel);
+        ipPanel.add(portField);
+
+        //connect button
+        JPanel connectPanel = new JPanel();
+        JButton connectButton = new JButton("connect");
+        connectButton.addActionListener(new ConnectAction(ipField, portField));
+
+        connectPanel.add(connectButton);
+        controlPanel.add(ipPanel);
+        controlPanel.add(connectPanel);
     }
 
-    private class MoveAction implements ActionListener {
+    private class ButtonAction implements ActionListener {
         public void actionPerformed(ActionEvent event) {
             String input = event.getActionCommand();
             System.out.println(input);
