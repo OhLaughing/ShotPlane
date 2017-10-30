@@ -16,6 +16,8 @@ public class ShotPlaneFrame extends JFrame {
     private ShotPlaneDisplayConponent displayComponent;
     private JTextField ipField;
     private JTextField portField;
+    private JTextArea chatDisplayArea;
+    private JTextArea chatInputArea;
 
     public ShotPlaneFrame() {
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -29,7 +31,7 @@ public class ShotPlaneFrame extends JFrame {
         controlPanelInit(controlPanel);
         add(displayPanel, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.EAST);
-        setResizable(false);
+//        setResizable(false);
     }
 
     private void controlPanelInit(JPanel controlPanel) {
@@ -99,6 +101,15 @@ public class ShotPlaneFrame extends JFrame {
         connectPanel.add(connectButton);
         controlPanel.add(ipPanel);
         controlPanel.add(connectPanel);
+
+        //chat panel
+        JPanel chatPanel = new JPanel();
+        chatDisplayArea = new JTextArea(10, 6);
+        chatInputArea = new JTextArea(8, 3);
+        chatPanel.add(chatDisplayArea);
+        chatPanel.add(chatInputArea);
+        connectButton.add(chatPanel);
+
     }
 
     private class ButtonAction implements ActionListener {
