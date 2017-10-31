@@ -5,6 +5,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class ShotPlaneFrame extends JFrame {
     private static final int DEFAULT_WIDTH = 800;
@@ -17,6 +23,7 @@ public class ShotPlaneFrame extends JFrame {
     private JTextArea chatDisplayArea;
     private JTextArea chatInputArea;
     private GridBagConstraints constraints;
+    private PrintWriter pw;
 
     public ShotPlaneFrame() {
         controlPanel = new JPanel();
@@ -80,8 +87,7 @@ public class ShotPlaneFrame extends JFrame {
         JLabel ipLabel = new JLabel("IP:");
         JLabel portLabel = new JLabel("Port:");
         JButton connectButton = new JButton("connect");
-        connectButton.addActionListener(new ConnectAction(ipField, portField));
-
+        connectButton.addActionListener(new ConnectAction());
 
         constraints.anchor = GridBagConstraints.SOUTH;
         add(ipPortPanel, ipLabel, constraints, 0, 0, 1, 1);
@@ -256,6 +262,36 @@ public class ShotPlaneFrame extends JFrame {
                 gameDisplayComponent.disablePlane();
                 gameDisplayComponent.repaint();
             }
+        }
+    }
+
+    private class ConnectAction implements ActionListener {
+
+           @Override
+        public void actionPerformed(ActionEvent event) {
+            System.out.println(event.getActionCommand());
+            System.out.println("ip:" + ipField.getText());
+            System.out.println("port:" + portField.getText());
+            ServerSocket ss;
+            try {
+//                int port = Integer.valueOf(portField.getText());
+                ss = new ServerSocket(9988);
+                System.out.println("waiting client to connect");
+                chatDisplayArea.setText("waiting client to connect");
+                Socket s = ss.accept();
+                System.out.println("client connect");
+                InputStreamReader isr = new InputStreamReader(s.getInputStream());
+                BufferedReader br = new BufferedReader(isr);
+                pw = new PrintWriter(s.getOutputStream(), true);
+
+                while (true) {
+                    String info = br.readLine();
+                    chatDisplayArea.append("client:" + info + "\r\n");
+                }
+            } catch (IOException ee) {
+                ee.printStackTrace();
+            }
+            System.out.println("dddd");
         }
     }
 }
