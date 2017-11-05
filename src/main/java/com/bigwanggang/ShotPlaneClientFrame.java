@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class ShotPlaneClientFrame extends JFrame {
     private static final int DEFAULT_WIDTH = 800;
@@ -23,6 +24,8 @@ public class ShotPlaneClientFrame extends JFrame {
     private JTextArea chatInputArea;
     private GridBagConstraints constraints;
     private PrintWriter pw;
+    private boolean clientIsOn = false;
+    private JButton connectButton;
 
     public ShotPlaneClientFrame() {
         controlPanel = new JPanel();
@@ -61,12 +64,25 @@ public class ShotPlaneClientFrame extends JFrame {
         split.setDividerLocation(150);
         dis_input_split.setRightComponent(split);
         split.setLeftComponent(chatInputArea);
-        JButton sendButton = new JButton("SEND");
-        split.setRightComponent(sendButton);
+        initSendButton(split);
 
         controlPanelInit();
         setTitle("Client");
 //        setResizable(false);
+    }
+
+    private void initSendButton(JSplitPane split) {
+        JButton sendButton = new JButton("SEND");
+        split.setRightComponent(sendButton);
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String info = chatInputArea.getText();
+                chatDisplayArea.append("client:" + info + "\r\n");
+                pw.println(info);
+                chatInputArea.setText("");
+            }
+        });
     }
 
     private void controlPanelInit() {
@@ -86,7 +102,7 @@ public class ShotPlaneClientFrame extends JFrame {
 
         JLabel ipLabel = new JLabel("IP:");
         JLabel portLabel = new JLabel("Port:");
-        JButton connectButton = new JButton("connect");
+        connectButton = new JButton("connect");
         connectButton.addActionListener(new ConnectAction());
 
         constraints.anchor = GridBagConstraints.SOUTH;
@@ -272,23 +288,29 @@ public class ShotPlaneClientFrame extends JFrame {
             System.out.println(event.getActionCommand());
             System.out.println("ip:" + ipField.getText());
             System.out.println("port:" + portField.getText());
-
-            try {
-                Socket s = new Socket(ipField.getText(), Integer.valueOf(portField.getText()));
-
-                InputStreamReader isr = new InputStreamReader(s.getInputStream());
-                BufferedReader br = new BufferedReader(isr);
-                pw = new PrintWriter(s.getOutputStream(), true);
-                while (true) {
-                    String info = br.readLine();
-                    chatDisplayArea.append("server:  " + info + "\r\n");
+            String ip = ipField.getText();
+            int port = Integer.parseInt(portField.getText());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Socket s = new Socket("127.0.0.1", 9988);
+                        InputStreamReader isr = new InputStreamReader(s.getInputStream());
+                        BufferedReader br = new BufferedReader(isr);
+                        pw = new PrintWriter(s.getOutputStream(), true);
+                        while (true) {
+                            String info = br.readLine();
+                            chatDisplayArea.append("server:  " + info + "\r\n");
+                        }
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                pw = null;
-            }
-
+            }).start();
+            connectButton.setEnabled(false);
+            System.out.println("connect button disable");
         }
     }
 }

@@ -63,12 +63,25 @@ public class ShotPlaneFrame extends JFrame {
         split.setDividerLocation(150);
         dis_input_split.setRightComponent(split);
         split.setLeftComponent(chatInputArea);
-        JButton sendButton = new JButton("SEND");
-        split.setRightComponent(sendButton);
+        initSendButton(split);
 
         controlPanelInit();
         setTitle("Server");
 //        setResizable(false);
+    }
+
+    private void initSendButton(JSplitPane split) {
+        JButton sendButton = new JButton("SEND");
+        split.setRightComponent(sendButton);
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String info = chatInputArea.getText();
+                chatDisplayArea.append("Server:" + info + "\r\n");
+                pw.println(info);
+                chatInputArea.setText("");
+            }
+        });
     }
 
     private void controlPanelInit() {
@@ -275,7 +288,7 @@ public class ShotPlaneFrame extends JFrame {
             System.out.println("ip:" + ipField.getText());
             System.out.println("port:" + portField.getText());
 
-            if(!serverIsOn) {
+            if (!serverIsOn) {
                 new Thread(new Runnable() {
                     ServerSocket ss;
 
@@ -286,7 +299,7 @@ public class ShotPlaneFrame extends JFrame {
                             ss = new ServerSocket(9988);
                             Socket s = ss.accept();
                             System.out.println("client connect");
-                            chatDisplayArea.append("client connect!!");
+                            chatDisplayArea.append("client connect!!\n");
                             InputStreamReader isr = new InputStreamReader(s.getInputStream());
                             BufferedReader br = new BufferedReader(isr);
                             pw = new PrintWriter(s.getOutputStream(), true);

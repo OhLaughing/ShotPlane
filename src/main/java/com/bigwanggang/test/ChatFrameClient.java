@@ -88,15 +88,15 @@ public class ChatFrameClient {
         });
     }
 
-    private void socket(){
+    private void socket() {
         try {
-            Socket s = new Socket("127.0.0.1",9988);
-            InputStreamReader isr=new InputStreamReader(s.getInputStream());
-            BufferedReader br=new BufferedReader(isr);
-            pw=new PrintWriter(s.getOutputStream(),true);
-            while(true){
-                String info=br.readLine();
-                area_showWindow.append("server:  "+info+"\r\n");
+            Socket s = new Socket("127.0.0.1", 9988);
+            InputStreamReader isr = new InputStreamReader(s.getInputStream());
+            BufferedReader br = new BufferedReader(isr);
+            pw = new PrintWriter(s.getOutputStream(), true);
+            while (true) {
+                String info = br.readLine();
+                area_showWindow.append("server:  " + info + "\r\n");
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();

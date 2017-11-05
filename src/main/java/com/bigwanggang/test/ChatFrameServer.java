@@ -19,7 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-public class ChatFrameServer{
+public class ChatFrameServer {
 
     private PrintWriter pw;
     private JFrame frame;
@@ -49,7 +49,7 @@ public class ChatFrameServer{
 
     }
 
-    public void showFrame(){
+    public void showFrame() {
         initFrame();
         initChatTextArea();
         initButton();
@@ -57,15 +57,15 @@ public class ChatFrameServer{
         socket();
     }
 
-    public void initFrame(){
+    public void initFrame() {
         frame.setTitle("server");
-        int width = (int)Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-        int height = (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+        int width = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+        int height = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
         frame.setBounds(width / 2, height / 2, 400, 450);
         frame.setVisible(true);
     }
 
-    private void initChatTextArea(){
+    private void initChatTextArea() {
         pane_showWindow.getViewport().add(area_showWindow);
         pane_inputWindow.getViewport().add(area_inputWindow);
         area_showWindow.setEditable(false);
@@ -73,41 +73,43 @@ public class ChatFrameServer{
         frame.add(pane_center, BorderLayout.CENTER);
     }
 
-    public void initButton(){
+    public void initButton() {
         pane_buttom.add(btn_send);
         frame.add(pane_buttom, BorderLayout.SOUTH);
     }
 
 
-    private void btn_send(){
+    private void btn_send() {
         btn_send.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 String info = area_inputWindow.getText();
-                area_showWindow.append("server: "+info+"\r\n");
+                area_showWindow.append("server: " + info + "\r\n");
                 pw.println(info);
                 area_inputWindow.setText("");
             }
         });
     }
-    private void socket(){
+
+    private void socket() {
         ServerSocket ss;
         try {
             ss = new ServerSocket(9988);
-            Socket s=ss.accept();
-            InputStreamReader isr=new InputStreamReader(s.getInputStream());
-            BufferedReader br=new BufferedReader(isr);
-            pw=new PrintWriter(s.getOutputStream(),true);
+            Socket s = ss.accept();
+            InputStreamReader isr = new InputStreamReader(s.getInputStream());
+            BufferedReader br = new BufferedReader(isr);
+            pw = new PrintWriter(s.getOutputStream(), true);
 
-            while(true) {
-                String info=br.readLine();
-                area_showWindow.append("client"+info+"\r\n");
+            while (true) {
+                String info = br.readLine();
+                area_showWindow.append("client" + info + "\r\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) {
         ChatFrameServer chat = new ChatFrameServer();
         chat.showFrame();
