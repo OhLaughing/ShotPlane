@@ -31,10 +31,12 @@ public class ShotPlaneClientFrame extends JFrame {
         controlPanel = new JPanel();
         chatDisplayArea = new JTextArea(6, 6);
         chatInputArea = new JTextArea(6, 3);
+        chatInputArea.setLineWrap(true);
+        chatDisplayArea.setLineWrap(true);
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         gameDisplayComponent = new ShotPlaneDisplayConponent(plane);
         constraints = new GridBagConstraints();
-        ipField = new JTextField(10);
+        ipField = new JTextField("127.0.0.1", 10);
         portField = new JTextField(10);
 
         //separator of game display and infomation display
@@ -277,6 +279,15 @@ public class ShotPlaneClientFrame extends JFrame {
                 }
                 gameDisplayComponent.disablePlane();
                 gameDisplayComponent.repaint();
+                System.out.println(GameControl.SERVERREADY);
+                if (GameControl.SERVERREADY == 1) {
+                    pw.println("game begin");
+                    chatDisplayArea.append("game begin");
+                } else {
+                    GameControl.CLIENTREADY = 1;
+                    System.out.println("Client ready");
+                    pw.println("Client ready");
+                }
             }
         }
     }
@@ -288,16 +299,19 @@ public class ShotPlaneClientFrame extends JFrame {
             System.out.println(event.getActionCommand());
             System.out.println("ip:" + ipField.getText());
             System.out.println("port:" + portField.getText());
-            String ip = ipField.getText();
-            int port = Integer.parseInt(portField.getText());
+            String ip = ipField.getText().trim();
+
+            int port = Integer.parseInt(portField.getText().trim());
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        Socket s = new Socket("127.0.0.1", 9988);
+                        Socket s = new Socket(ip, port);
                         InputStreamReader isr = new InputStreamReader(s.getInputStream());
                         BufferedReader br = new BufferedReader(isr);
                         pw = new PrintWriter(s.getOutputStream(), true);
+                        chatDisplayArea.append("client has connected to server\n");
+                        chatDisplayArea.append("put the plane and press OK Button to begin game\n");
                         while (true) {
                             String info = br.readLine();
                             chatDisplayArea.append("server:  " + info + "\r\n");

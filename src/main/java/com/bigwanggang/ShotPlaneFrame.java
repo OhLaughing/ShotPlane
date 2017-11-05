@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -25,11 +26,14 @@ public class ShotPlaneFrame extends JFrame {
     private GridBagConstraints constraints;
     private PrintWriter pw;
     private boolean serverIsOn = false;
+    private JButton connectButton;
 
     public ShotPlaneFrame() {
         controlPanel = new JPanel();
         chatDisplayArea = new JTextArea(6, 6);
         chatInputArea = new JTextArea(6, 3);
+        chatInputArea.setLineWrap(true);
+        chatDisplayArea.setLineWrap(true);
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         gameDisplayComponent = new ShotPlaneDisplayConponent(plane);
         constraints = new GridBagConstraints();
@@ -101,7 +105,7 @@ public class ShotPlaneFrame extends JFrame {
 
         JLabel ipLabel = new JLabel("IP:");
         JLabel portLabel = new JLabel("Port:");
-        JButton connectButton = new JButton("connect");
+        connectButton = new JButton("connect");
         connectButton.addActionListener(new ConnectAction());
 
         constraints.anchor = GridBagConstraints.SOUTH;
@@ -148,7 +152,7 @@ public class ShotPlaneFrame extends JFrame {
         controlPanel.add(directionPanel);
     }
 
-    public void add(JPanel panel, Component c, GridBagConstraints constraints, int x, int y, int w, int h) {//此方法用来添加控件到容器中
+    public void add(JPanel panel, Component c, GridBagConstraints constraints, int x, int y, int w, int h) {
         constraints.gridx = x;
         constraints.gridy = y;
         constraints.gridwidth = w;
@@ -276,30 +280,42 @@ public class ShotPlaneFrame extends JFrame {
                 }
                 gameDisplayComponent.disablePlane();
                 gameDisplayComponent.repaint();
+                System.out.println("client: " + GameControl.CLIENTREADY);
+                if (GameControl.CLIENTREADY == 1) {
+                    pw.println("game begin");
+                    chatDisplayArea.append("game begin");
+                } else {
+                    GameControl.SERVERREADY = 1;
+                    pw.println("server ready");
+                    System.out.println("server ready");
+                    System.out.println("server ready:" + GameControl.SERVERREADY);
+                }
             }
         }
     }
 
     private class ConnectAction implements ActionListener {
 
+
         @Override
         public void actionPerformed(ActionEvent event) {
             System.out.println(event.getActionCommand());
-            System.out.println("ip:" + ipField.getText());
-            System.out.println("port:" + portField.getText());
+            int port = Integer.valueOf(portField.getText());
 
             if (!serverIsOn) {
                 new Thread(new Runnable() {
-                    ServerSocket ss;
 
                     @Override
                     public void run() {
                         try {
-                            System.out.println("waiting client to connect");
-                            ss = new ServerSocket(9988);
+                            ServerSocket ss = new ServerSocket(port);
+                            InetAddress localhostAddress = InetAddress.getLocalHost();
+                            chatDisplayArea.append("server start up, waiting client to connect\n");
+                            chatDisplayArea.append("server ip: " + localhostAddress.getHostAddress() + ", port: " + port + "\n");
                             Socket s = ss.accept();
                             System.out.println("client connect");
                             chatDisplayArea.append("client connect!!\n");
+                            chatDisplayArea.append("put the plane and press OK Button to begin game\n");
                             InputStreamReader isr = new InputStreamReader(s.getInputStream());
                             BufferedReader br = new BufferedReader(isr);
                             pw = new PrintWriter(s.getOutputStream(), true);
@@ -316,9 +332,9 @@ public class ShotPlaneFrame extends JFrame {
                     }
                 }).start();
                 serverIsOn = true;
-
+                chatDisplayArea.setEnabled(false);
+                connectButton.setEnabled(false);
             }
-            System.out.println("dddd");
         }
     }
 }
