@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ShotPlaneClientFrame extends JFrame {
@@ -24,7 +23,6 @@ public class ShotPlaneClientFrame extends JFrame {
     private JTextArea chatInputArea;
     private GridBagConstraints constraints;
     private PrintWriter pw;
-    private boolean serverIsOn = false;
 
     public ShotPlaneClientFrame() {
         controlPanel = new JPanel();
@@ -36,29 +34,29 @@ public class ShotPlaneClientFrame extends JFrame {
         ipField = new JTextField(10);
         portField = new JTextField(10);
 
-        //游戏显示和信息显示的分隔符
+        //separator of game display and infomation display
         JSplitPane pane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         pane1.setDividerSize(1);
         pane1.setDividerLocation(300);
         pane1.setEnabled(false);
         getContentPane().add(pane1, BorderLayout.CENTER);
 
-        //信息显示和控制栏的分隔符
+        //separator of information diaplay and control panel
         JSplitPane dis_control_split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         dis_control_split.setDividerLocation(200);
         dis_control_split.setEnabled(false);
-        //分隔符左侧是游戏显示窗口
+        //left of separator is game diaplay panel
         pane1.setLeftComponent(gameDisplayComponent);
         pane1.setRightComponent(dis_control_split);
 
-        //信息显示和信息输入的分隔符
+        //separator of information diaplay and information input palen
         JSplitPane dis_input_split = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         dis_input_split.setDividerLocation(220);
         dis_control_split.setLeftComponent(dis_input_split);
         dis_control_split.setRightComponent(controlPanel);
         dis_input_split.setLeftComponent(chatDisplayArea);
 
-        //信息输入和发送信息按钮分隔
+        //separator of information input and sent information
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         split.setDividerLocation(150);
         dis_input_split.setRightComponent(split);
@@ -67,6 +65,7 @@ public class ShotPlaneClientFrame extends JFrame {
         split.setRightComponent(sendButton);
 
         controlPanelInit();
+        setTitle("Client");
 //        setResizable(false);
     }
 
@@ -134,7 +133,7 @@ public class ShotPlaneClientFrame extends JFrame {
         controlPanel.add(directionPanel);
     }
 
-    public void add(JPanel panel, Component c, GridBagConstraints constraints, int x, int y, int w, int h) {//此方法用来添加控件到容器中
+    public void add(JPanel panel, Component c, GridBagConstraints constraints, int x, int y, int w, int h) {
         constraints.gridx = x;
         constraints.gridy = y;
         constraints.gridwidth = w;
@@ -276,16 +275,13 @@ public class ShotPlaneClientFrame extends JFrame {
 
             try {
                 Socket s = new Socket(ipField.getText(), Integer.valueOf(portField.getText()));
-//                            Socket s = ss.accept();;
-                System.out.println("client connect");
-                chatDisplayArea.append("client connect!!");
+
                 InputStreamReader isr = new InputStreamReader(s.getInputStream());
                 BufferedReader br = new BufferedReader(isr);
                 pw = new PrintWriter(s.getOutputStream(), true);
-
                 while (true) {
                     String info = br.readLine();
-                    chatDisplayArea.append("client:" + info + "\r\n");
+                    chatDisplayArea.append("server:  " + info + "\r\n");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -293,7 +289,6 @@ public class ShotPlaneClientFrame extends JFrame {
                 pw = null;
             }
 
-            System.out.println("dddd");
         }
     }
 }
