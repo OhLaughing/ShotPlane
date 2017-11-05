@@ -18,7 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-public class ChatFrame{
+public class ChatFrameClient {
     private PrintWriter pw;
     private JFrame frame;
     private JPanel pane_buttom;
@@ -33,7 +33,7 @@ public class ChatFrame{
 
     private Dimension dimension;
 
-    public ChatFrame() {
+    public ChatFrameClient() {
         frame = new JFrame();
         pane_buttom = new JPanel();
         pane_showWindow = new JScrollPane();
@@ -105,7 +105,7 @@ public class ChatFrame{
         }
     }
     public static void main(String[] args) {
-        ChatFrame chat = new ChatFrame();
+        ChatFrameClient chat = new ChatFrameClient();
         chat.showFrame();
     }
 }

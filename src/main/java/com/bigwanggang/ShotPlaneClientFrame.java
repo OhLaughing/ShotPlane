@@ -12,7 +12,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ShotPlaneFrame extends JFrame {
+public class ShotPlaneClientFrame extends JFrame {
     private static final int DEFAULT_WIDTH = 800;
     private static final int DEFAULT_HEIGHT = 350;
     private Plane plane = new Plane(6, 5, 6, 8);
@@ -26,7 +26,7 @@ public class ShotPlaneFrame extends JFrame {
     private PrintWriter pw;
     private boolean serverIsOn = false;
 
-    public ShotPlaneFrame() {
+    public ShotPlaneClientFrame() {
         controlPanel = new JPanel();
         chatDisplayArea = new JTextArea(6, 6);
         chatInputArea = new JTextArea(6, 3);
@@ -274,36 +274,25 @@ public class ShotPlaneFrame extends JFrame {
             System.out.println("ip:" + ipField.getText());
             System.out.println("port:" + portField.getText());
 
-            if(!serverIsOn) {
-                new Thread(new Runnable() {
-                    ServerSocket ss;
+            try {
+                Socket s = new Socket(ipField.getText(), Integer.valueOf(portField.getText()));
+//                            Socket s = ss.accept();;
+                System.out.println("client connect");
+                chatDisplayArea.append("client connect!!");
+                InputStreamReader isr = new InputStreamReader(s.getInputStream());
+                BufferedReader br = new BufferedReader(isr);
+                pw = new PrintWriter(s.getOutputStream(), true);
 
-                    @Override
-                    public void run() {
-                        try {
-                            System.out.println("waiting client to connect");
-                            ss = new ServerSocket(9988);
-                            Socket s = ss.accept();
-                            System.out.println("client connect");
-                            chatDisplayArea.append("client connect!!");
-                            InputStreamReader isr = new InputStreamReader(s.getInputStream());
-                            BufferedReader br = new BufferedReader(isr);
-                            pw = new PrintWriter(s.getOutputStream(), true);
-
-                            while (true) {
-                                String info = br.readLine();
-                                chatDisplayArea.append("client:" + info + "\r\n");
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            pw = null;
-                        }
-                    }
-                }).start();
-                serverIsOn = true;
-
+                while (true) {
+                    String info = br.readLine();
+                    chatDisplayArea.append("client:" + info + "\r\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                pw = null;
             }
+
             System.out.println("dddd");
         }
     }
