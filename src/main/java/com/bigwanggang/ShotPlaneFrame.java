@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.regex.Matcher;
 
 public class ShotPlaneFrame extends JFrame {
     private static final int DEFAULT_WIDTH = 800;
@@ -26,6 +27,7 @@ public class ShotPlaneFrame extends JFrame {
     private GridBagConstraints constraints;
     private PrintWriter pw;
     private boolean serverIsOn = false;
+    private boolean clientIsReady = false;
     private JButton connectButton;
 
     public ShotPlaneFrame() {
@@ -280,22 +282,19 @@ public class ShotPlaneFrame extends JFrame {
                 }
                 gameDisplayComponent.disablePlane();
                 gameDisplayComponent.repaint();
-                System.out.println("client: " + GameControl.CLIENTREADY);
-                if (GameControl.CLIENTREADY == 1) {
+				gameDisplayComponent.addPrintWirter(pw);
+                gameDisplayComponent.disableComponent();
+                if (clientIsReady) {
                     pw.println("game begin");
-                    chatDisplayArea.append("game begin");
+                    chatDisplayArea.append("game begin\n");
                 } else {
-                    GameControl.SERVERREADY = 1;
-                    pw.println("server ready");
-                    System.out.println("server ready");
-                    System.out.println("server ready:" + GameControl.SERVERREADY);
+                    pw.println("server is ready");
                 }
             }
         }
     }
 
     private class ConnectAction implements ActionListener {
-
 
         @Override
         public void actionPerformed(ActionEvent event) {
@@ -322,6 +321,56 @@ public class ShotPlaneFrame extends JFrame {
 
                             while (true) {
                                 String info = br.readLine();
+                                if ("client is ready".equals(info))
+                                    clientIsReady = true;
+                                else if (Util.isHitAction(info)) {
+                                    chatDisplayArea.append("hit from client" + info);
+                                    Matcher m = Util.HITPATTER.matcher(info);
+                                    int x = -1;
+                                    int y = -1;
+                                    if (m.find()) {
+                                        x = Integer.parseInt(m.group(1));
+                                        y = Integer.parseInt(m.group(2));
+                                    }
+                                    Point p = new Point(x, y);
+                                    if (Util.ifHitDownPlane(plane, p)) {
+                                        pw.println("hitResponse:" + x + ":" + y + ":2");
+                                    } else if (Util.ifHitPlane(plane, p)) {
+                                        pw.println("hitResponse:" + x + ":" + y + ":1");
+                                    } else {
+                                        pw.println("hitResponse:" + x + ":" + y + ":0");
+                                    }
+                                    gameDisplayComponent.enableComponent();
+                                } else if (Util.isHitResponseAction(info)) {
+                                    chatDisplayArea.append("response from client" + info);
+
+                                    Matcher m = Util.RESPONSEPATTERN.matcher(info);
+                                    int x = -1, y = -1, result = -1;
+                                    if (m.find()) {
+                                        x = Integer.parseInt(m.group(1));
+                                        y = Integer.parseInt(m.group(2));
+                                        result = Integer.parseInt(m.group(3));
+                                    }
+                                    Rectangle2D rectangle2D = new Rectangle2D.Double(x * 20 + 10, y * 20 + 10, 20, 20);
+                                    switch (result) {
+                                        case 0: {
+                                            gameDisplayComponent.putRectangle(rectangle2D, Color.WHITE);
+                                            break;
+                                        }
+                                        case 1: {
+                                            gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
+                                            break;
+                                        }
+                                        case 2: {
+                                            gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
+                                            break;
+                                        }
+                                        default:
+                                            break;
+                                    }
+                                    gameDisplayComponent.repaint();
+                                    gameDisplayComponent.disableComponent();
+                                }
                                 chatDisplayArea.append("client:" + info + "\r\n");
                             }
                         } catch (IOException e) {
