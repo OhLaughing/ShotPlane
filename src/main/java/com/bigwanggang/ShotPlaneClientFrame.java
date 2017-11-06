@@ -14,8 +14,8 @@ import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 
 public class ShotPlaneClientFrame extends JFrame {
-    private static final int DEFAULT_WIDTH = 800;
-    private static final int DEFAULT_HEIGHT = 350;
+    private static final int DEFAULT_WIDTH = 600;
+    private static final int DEFAULT_HEIGHT = 450;
     private Plane plane = new Plane(6, 5, 6, 8);
     private ShotPlaneDisplayConponent gameDisplayComponent;
     private JPanel controlPanel;
@@ -23,9 +23,10 @@ public class ShotPlaneClientFrame extends JFrame {
     private JTextField portField;
     private JTextArea chatDisplayArea;
     private JTextArea chatInputArea;
+    private JScrollPane chatDisplayWindow;
+    private JScrollPane chatInputWindow;
     private GridBagConstraints constraints;
     private PrintWriter pw;
-    private boolean clientIsOn = false;
     private JButton connectButton;
     private boolean serverIsReady = false;
 
@@ -33,48 +34,55 @@ public class ShotPlaneClientFrame extends JFrame {
         controlPanel = new JPanel();
         chatDisplayArea = new JTextArea(6, 6);
         chatInputArea = new JTextArea(6, 3);
+        chatDisplayWindow = new JScrollPane();
+        chatInputWindow = new JScrollPane();
+        chatDisplayWindow.getViewport().add(chatDisplayArea);
+        chatInputWindow.getViewport().add(chatInputArea);
         chatInputArea.setLineWrap(true);
         chatDisplayArea.setLineWrap(true);
+        chatDisplayArea.setForeground(Color.BLACK);
+
+        chatDisplayArea.setFont(new java.awt.Font("Dialog", 1, 14));
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         gameDisplayComponent = new ShotPlaneDisplayConponent(plane);
         constraints = new GridBagConstraints();
         ipField = new JTextField("127.0.0.1", 10);
         portField = new JTextField(10);
 
+        JSplitPane up_down = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        up_down.setDividerSize(2);
+        up_down.setDividerLocation(300);
+        up_down.setEnabled(false);
+        getContentPane().add(up_down, BorderLayout.CENTER);
+
         //separator of game display and infomation display
-        JSplitPane pane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        pane1.setDividerSize(1);
-        pane1.setDividerLocation(300);
-        pane1.setEnabled(false);
-        getContentPane().add(pane1, BorderLayout.CENTER);
+        JSplitPane left_right = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        left_right.setDividerSize(1);
+        left_right.setDividerLocation(300);
+        left_right.setEnabled(false);
+        up_down.setLeftComponent(left_right);
+        up_down.setRightComponent(controlPanel);
 
-        //separator of information diaplay and control panel
-        JSplitPane dis_control_split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        dis_control_split.setDividerLocation(200);
-        dis_control_split.setEnabled(false);
         //left of separator is game diaplay panel
-        pane1.setLeftComponent(gameDisplayComponent);
-        pane1.setRightComponent(dis_control_split);
+        left_right.setLeftComponent(gameDisplayComponent);
 
-        //separator of information diaplay and information input palen
+        //separator of information diaplay and information input panel
         JSplitPane dis_input_split = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        dis_input_split.setDividerLocation(220);
-        dis_control_split.setLeftComponent(dis_input_split);
-        dis_control_split.setRightComponent(controlPanel);
-        dis_input_split.setLeftComponent(chatDisplayArea);
+        dis_input_split.setDividerLocation(200);
+        dis_input_split.setLeftComponent(chatDisplayWindow);
+        left_right.setRightComponent(dis_input_split);
 
         //separator of information input and sent information
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        split.setDividerLocation(150);
+        split.setDividerLocation(200);
         dis_input_split.setRightComponent(split);
-        split.setLeftComponent(chatInputArea);
+        split.setLeftComponent(chatInputWindow);
         initSendButton(split);
 
         controlPanelInit();
         setTitle("Client");
-//        setResizable(false);
+        setResizable(false);
     }
-
     private void initSendButton(JSplitPane split) {
         JButton sendButton = new JButton("SEND");
         split.setRightComponent(sendButton);
@@ -90,12 +98,10 @@ public class ShotPlaneClientFrame extends JFrame {
     }
 
     private void controlPanelInit() {
-        controlPanel.setLayout(new GridLayout(2, 1));
-
-        initIpPortInputPanel();
-
+        controlPanel.setLayout(new GridLayout(1, 2));
         initDirectPanel();
-        setResizable(false);
+        initIpPortInputPanel();
+         setResizable(false);
     }
 
     private void initIpPortInputPanel() {
@@ -284,7 +290,7 @@ public class ShotPlaneClientFrame extends JFrame {
                 gameDisplayComponent.addPrintWirter(pw);
                 if (serverIsReady) {
                     pw.println("game begin!");
-                    chatDisplayArea.append("game begin!");
+                    chatDisplayArea.append("game begin!\n");
                     gameDisplayComponent.enableComponent();
                 } else {
                     pw.println("client is ready");
@@ -321,7 +327,7 @@ public class ShotPlaneClientFrame extends JFrame {
                             else if ("game begin".equals(info))
                                 gameDisplayComponent.enableComponent();
                             else if (Util.isHitAction(info)) {
-                                chatDisplayArea.append("hit from server" + info);
+                                chatDisplayArea.append("hit from server" + info + "\n");
                                 Matcher m = Util.HITPATTER.matcher(info);
                                 int x = -1;
                                 int y = -1;
@@ -331,7 +337,7 @@ public class ShotPlaneClientFrame extends JFrame {
                                 }
 
                                 Point p = new Point(x, y);
-                        
+
                                 if (Util.ifHitDownPlane(plane, p)) {
                                     pw.println("hitResponse:" + x + ":" + y + ":2");
                                 } else if (Util.ifHitPlane(plane, p)) {
@@ -341,7 +347,6 @@ public class ShotPlaneClientFrame extends JFrame {
                                 }
                                 gameDisplayComponent.enableComponent();
                             } else if (Util.isHitResponseAction(info)) {
-                                chatDisplayArea.append("response from server" + info);
                                 Matcher m = Util.RESPONSEPATTERN.matcher(info);
                                 int x = -1, y = -1, result = -1;
                                 if (m.find()) {
@@ -353,14 +358,17 @@ public class ShotPlaneClientFrame extends JFrame {
                                 switch (result) {
                                     case 0: {
                                         gameDisplayComponent.putRectangle(rectangle2D, Color.WHITE);
+                                        chatDisplayArea.append("does not hit the plane");
                                         break;
                                     }
                                     case 1: {
                                         gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
+                                        chatDisplayArea.append("hit the body of the plane");
                                         break;
                                     }
                                     case 2: {
                                         gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
+                                        chatDisplayArea.append("hit down the plane, you win");
                                         break;
                                     }
                                     default:
