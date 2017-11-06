@@ -54,7 +54,7 @@ public class ShotPlaneFrame extends JFrame {
         JSplitPane up_down = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         up_down.setDividerSize(2);
         up_down.setDividerLocation(300);
-up_down.setEnabled(false);
+        up_down.setEnabled(false);
         getContentPane().add(up_down, BorderLayout.CENTER);
 
         //separator of game display and infomation display
@@ -333,7 +333,7 @@ up_down.setEnabled(false);
                                 if ("client is ready".equals(info))
                                     clientIsReady = true;
                                 else if (Util.isHitAction(info)) {
-                                    chatDisplayArea.append("hit from client" + info);
+//                                    chatDisplayArea.append("hit from client" + info);
                                     Matcher m = Util.HITPATTER.matcher(info);
                                     int x = -1;
                                     int y = -1;
@@ -362,17 +362,17 @@ up_down.setEnabled(false);
                                     switch (result) {
                                         case 0: {
                                             gameDisplayComponent.putRectangle(rectangle2D, Color.WHITE);
-                                            chatDisplayArea.append("does not hit the plane");
+                                            chatDisplayArea.append("does not hit the plane\n");
                                             break;
                                         }
                                         case 1: {
                                             gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
-                                            chatDisplayArea.append("hit the body of the plane");
+                                            chatDisplayArea.append("hit the body of the plane\n");
                                             break;
                                         }
                                         case 2: {
                                             gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
-                                            chatDisplayArea.append("hit down the plane, you win");
+                                            chatDisplayArea.append("hit down the plane, you win\n");
                                             break;
                                         }
                                         default:
@@ -381,7 +381,7 @@ up_down.setEnabled(false);
                                     gameDisplayComponent.repaint();
                                     gameDisplayComponent.disableComponent();
                                 }
-                                chatDisplayArea.append("client:" + info + "\r\n");
+//                                chatDisplayArea.append("client:" + info + "\r\n");
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -391,7 +391,7 @@ up_down.setEnabled(false);
                     }
                 }).start();
                 serverIsOn = true;
-               
+
                 connectButton.setEnabled(false);
             }
         }
