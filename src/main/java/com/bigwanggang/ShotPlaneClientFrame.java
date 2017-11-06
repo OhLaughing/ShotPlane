@@ -83,6 +83,7 @@ public class ShotPlaneClientFrame extends JFrame {
         setTitle("Client");
         setResizable(false);
     }
+
     private void initSendButton(JSplitPane split) {
         JButton sendButton = new JButton("SEND");
         split.setRightComponent(sendButton);
@@ -101,7 +102,7 @@ public class ShotPlaneClientFrame extends JFrame {
         controlPanel.setLayout(new GridLayout(1, 2));
         initDirectPanel();
         initIpPortInputPanel();
-         setResizable(false);
+        setResizable(false);
     }
 
     private void initIpPortInputPanel() {
@@ -327,7 +328,7 @@ public class ShotPlaneClientFrame extends JFrame {
                             else if ("game begin".equals(info))
                                 gameDisplayComponent.enableComponent();
                             else if (Util.isHitAction(info)) {
-                                chatDisplayArea.append("hit from server" + info + "\n");
+//                                chatDisplayArea.append("hit from server" + info + "\n");
                                 Matcher m = Util.HITPATTER.matcher(info);
                                 int x = -1;
                                 int y = -1;
@@ -358,17 +359,17 @@ public class ShotPlaneClientFrame extends JFrame {
                                 switch (result) {
                                     case 0: {
                                         gameDisplayComponent.putRectangle(rectangle2D, Color.WHITE);
-                                        chatDisplayArea.append("does not hit the plane");
+                                        chatDisplayArea.append("does not hit the plane\n");
                                         break;
                                     }
                                     case 1: {
                                         gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
-                                        chatDisplayArea.append("hit the body of the plane");
+                                        chatDisplayArea.append("hit the body of the plane\n");
                                         break;
                                     }
                                     case 2: {
                                         gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
-                                        chatDisplayArea.append("hit down the plane, you win");
+                                        chatDisplayArea.append("hit down the plane, you win\n");
                                         break;
                                     }
                                     default:
@@ -378,7 +379,7 @@ public class ShotPlaneClientFrame extends JFrame {
                                 gameDisplayComponent.disableComponent();
                             }
 
-                            chatDisplayArea.append("server:  " + info + "\r\n");
+//                            chatDisplayArea.append("server:  " + info + "\r\n");
                         }
                     } catch (UnknownHostException e) {
                         e.printStackTrace();
