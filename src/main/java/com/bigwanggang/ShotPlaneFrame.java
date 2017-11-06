@@ -15,8 +15,8 @@ import java.net.Socket;
 import java.util.regex.Matcher;
 
 public class ShotPlaneFrame extends JFrame {
-    private static final int DEFAULT_WIDTH = 800;
-    private static final int DEFAULT_HEIGHT = 350;
+    private static final int DEFAULT_WIDTH = 600;
+    private static final int DEFAULT_HEIGHT = 450;
     private Plane plane = new Plane(6, 5, 6, 8);
     private ShotPlaneDisplayConponent gameDisplayComponent;
     private JPanel controlPanel;
@@ -24,6 +24,8 @@ public class ShotPlaneFrame extends JFrame {
     private JTextField portField;
     private JTextArea chatDisplayArea;
     private JTextArea chatInputArea;
+    private JScrollPane chatDisplayWindow;
+    private JScrollPane chatInputWindow;
     private GridBagConstraints constraints;
     private PrintWriter pw;
     private boolean serverIsOn = false;
@@ -34,46 +36,54 @@ public class ShotPlaneFrame extends JFrame {
         controlPanel = new JPanel();
         chatDisplayArea = new JTextArea(6, 6);
         chatInputArea = new JTextArea(6, 3);
+        chatDisplayWindow = new JScrollPane();
+        chatInputWindow = new JScrollPane();
+        chatDisplayWindow.getViewport().add(chatDisplayArea);
+        chatInputWindow.getViewport().add(chatInputArea);
         chatInputArea.setLineWrap(true);
         chatDisplayArea.setLineWrap(true);
+        chatDisplayArea.setForeground(Color.BLACK);
+
+        chatDisplayArea.setFont(new java.awt.Font("Dialog", 1, 14));
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         gameDisplayComponent = new ShotPlaneDisplayConponent(plane);
         constraints = new GridBagConstraints();
         ipField = new JTextField(10);
         portField = new JTextField(10);
 
-        //separator of game display and infomation display
-        JSplitPane pane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        pane1.setDividerSize(1);
-        pane1.setDividerLocation(300);
-        pane1.setEnabled(false);
-        getContentPane().add(pane1, BorderLayout.CENTER);
+        JSplitPane up_down = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        up_down.setDividerSize(2);
+        up_down.setDividerLocation(300);
+up_down.setEnabled(false);
+        getContentPane().add(up_down, BorderLayout.CENTER);
 
-        //separator of information diaplay and control panel
-        JSplitPane dis_control_split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        dis_control_split.setDividerLocation(200);
-        dis_control_split.setEnabled(false);
+        //separator of game display and infomation display
+        JSplitPane left_right = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        left_right.setDividerSize(1);
+        left_right.setDividerLocation(300);
+        left_right.setEnabled(false);
+        up_down.setLeftComponent(left_right);
+        up_down.setRightComponent(controlPanel);
+
         //left of separator is game diaplay panel
-        pane1.setLeftComponent(gameDisplayComponent);
-        pane1.setRightComponent(dis_control_split);
+        left_right.setLeftComponent(gameDisplayComponent);
 
         //separator of information diaplay and information input palen
         JSplitPane dis_input_split = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        dis_input_split.setDividerLocation(220);
-        dis_control_split.setLeftComponent(dis_input_split);
-        dis_control_split.setRightComponent(controlPanel);
-        dis_input_split.setLeftComponent(chatDisplayArea);
+        dis_input_split.setDividerLocation(200);
+        dis_input_split.setLeftComponent(chatDisplayWindow);
+        left_right.setRightComponent(dis_input_split);
 
         //separator of information input and sent information
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        split.setDividerLocation(150);
+        split.setDividerLocation(200);
         dis_input_split.setRightComponent(split);
-        split.setLeftComponent(chatInputArea);
+        split.setLeftComponent(chatInputWindow);
         initSendButton(split);
 
         controlPanelInit();
         setTitle("Server");
-//        setResizable(false);
+        setResizable(false);
     }
 
     private void initSendButton(JSplitPane split) {
@@ -91,11 +101,10 @@ public class ShotPlaneFrame extends JFrame {
     }
 
     private void controlPanelInit() {
-        controlPanel.setLayout(new GridLayout(2, 1));
-
+        controlPanel.setLayout(new GridLayout(1, 2));
+        initDirectPanel();
         initIpPortInputPanel();
 
-        initDirectPanel();
         setResizable(false);
     }
 
@@ -282,7 +291,7 @@ public class ShotPlaneFrame extends JFrame {
                 }
                 gameDisplayComponent.disablePlane();
                 gameDisplayComponent.repaint();
-				gameDisplayComponent.addPrintWirter(pw);
+                gameDisplayComponent.addPrintWirter(pw);
                 gameDisplayComponent.disableComponent();
                 if (clientIsReady) {
                     pw.println("game begin");
@@ -342,8 +351,6 @@ public class ShotPlaneFrame extends JFrame {
                                     }
                                     gameDisplayComponent.enableComponent();
                                 } else if (Util.isHitResponseAction(info)) {
-                                    chatDisplayArea.append("response from client" + info);
-
                                     Matcher m = Util.RESPONSEPATTERN.matcher(info);
                                     int x = -1, y = -1, result = -1;
                                     if (m.find()) {
@@ -355,14 +362,17 @@ public class ShotPlaneFrame extends JFrame {
                                     switch (result) {
                                         case 0: {
                                             gameDisplayComponent.putRectangle(rectangle2D, Color.WHITE);
+                                            chatDisplayArea.append("does not hit the plane");
                                             break;
                                         }
                                         case 1: {
                                             gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
+                                            chatDisplayArea.append("hit the body of the plane");
                                             break;
                                         }
                                         case 2: {
                                             gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
+                                            chatDisplayArea.append("hit down the plane, you win");
                                             break;
                                         }
                                         default:
@@ -381,7 +391,7 @@ public class ShotPlaneFrame extends JFrame {
                     }
                 }).start();
                 serverIsOn = true;
-                chatDisplayArea.setEnabled(false);
+               
                 connectButton.setEnabled(false);
             }
         }
