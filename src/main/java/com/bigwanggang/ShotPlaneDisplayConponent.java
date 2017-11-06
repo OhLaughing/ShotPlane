@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,9 +17,11 @@ public class ShotPlaneDisplayConponent extends JComponent {
     private static final int DEFAULT_HEIGHT = 291;
     private List<Line2D> line2DList = null;
     private Map<Rectangle2D, Color> squares;
+    private PrintWriter pw;
     Graphics2D g2;
     private Plane plane;
     private boolean displayPlane = true;
+    private boolean turn = false;
 
     public ShotPlaneDisplayConponent(Plane plane) {
         this.plane = plane;
@@ -56,28 +59,15 @@ public class ShotPlaneDisplayConponent extends JComponent {
     private class ShotPlaneHandler extends MouseAdapter {
         public void mouseClicked(MouseEvent event) {
             Point point = event.getPoint();
-            if (event.getClickCount() >= 2) {
+            if (event.getClickCount() >= 2 && turn) {
                 int x = (int) point.getX();
                 int y = (int) point.getY();
                 if (x > 10 && x < 290 && y > 10 && y < 290) {
                     int xN = (x - 10) / 20;
                     int yN = (y - 10) / 20;
-                    System.out.println(xN + "," + yN);
-                    Line2D line2D = new Line2D.Double(xN * 20 + 10, yN * 20 + 10, xN * 20 + 30, yN * 20 + 30);
-                    Rectangle2D rectangle2D = new Rectangle2D.Double(xN * 20 + 10, yN * 20 + 10, 20, 20);
-                    Point p = new Point(xN, yN);
-                    if (Util.ifHitDownPlane(plane, p)) {
-                        squares.put(rectangle2D, Color.BLUE);
-                        System.out.println("hit down the plane");
-                    } else if (Util.ifHitPlane(plane, p)) {
-                        squares.put(rectangle2D, Color.BLUE);
-                        System.out.println("hit the plane, but does not hit down");
-                    } else {
-                        squares.put(rectangle2D, Color.WHITE);
-                        System.out.println("does not hit plane");
-                    }
-                    line2DList.add(line2D);
-                    repaint();
+                    turn = false;
+                    System.out.println("turn:" + turn);
+                    pw.println("hit:" + xN + ":" + yN);
                 }
             }
         }
@@ -142,5 +132,21 @@ public class ShotPlaneDisplayConponent extends JComponent {
 
     public void setPlane(Plane plane) {
         this.plane = plane;
+    }
+
+    public void disableComponent() {
+        turn = false;
+    }
+
+    public void enableComponent() {
+        turn = true;
+    }
+
+    public void addPrintWirter(PrintWriter pw) {
+        this.pw = pw;
+    }
+
+    public void putRectangle(Rectangle2D rectangle2D, Color color) {
+        squares.put(rectangle2D, color);
     }
 }
