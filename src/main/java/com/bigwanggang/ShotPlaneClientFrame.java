@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.regex.Matcher;
 
 public class ShotPlaneClientFrame extends JFrame {
     private static final int DEFAULT_WIDTH = 800;
@@ -26,6 +27,7 @@ public class ShotPlaneClientFrame extends JFrame {
     private PrintWriter pw;
     private boolean clientIsOn = false;
     private JButton connectButton;
+    private boolean serverIsReady = false;
 
     public ShotPlaneClientFrame() {
         controlPanel = new JPanel();
@@ -279,14 +281,13 @@ public class ShotPlaneClientFrame extends JFrame {
                 }
                 gameDisplayComponent.disablePlane();
                 gameDisplayComponent.repaint();
-                System.out.println(GameControl.SERVERREADY);
-                if (GameControl.SERVERREADY == 1) {
-                    pw.println("game begin");
-                    chatDisplayArea.append("game begin");
+                gameDisplayComponent.addPrintWirter(pw);
+                if (serverIsReady) {
+                    pw.println("game begin!");
+                    chatDisplayArea.append("game begin!");
+                    gameDisplayComponent.enableComponent();
                 } else {
-                    GameControl.CLIENTREADY = 1;
-                    System.out.println("Client ready");
-                    pw.println("Client ready");
+                    pw.println("client is ready");
                 }
             }
         }
@@ -310,10 +311,65 @@ public class ShotPlaneClientFrame extends JFrame {
                         InputStreamReader isr = new InputStreamReader(s.getInputStream());
                         BufferedReader br = new BufferedReader(isr);
                         pw = new PrintWriter(s.getOutputStream(), true);
+
                         chatDisplayArea.append("client has connected to server\n");
                         chatDisplayArea.append("put the plane and press OK Button to begin game\n");
                         while (true) {
                             String info = br.readLine();
+                            if ("server is ready".equals(info))
+                                serverIsReady = true;
+                            else if ("game begin".equals(info))
+                                gameDisplayComponent.enableComponent();
+                            else if (Util.isHitAction(info)) {
+                                chatDisplayArea.append("hit from server" + info);
+                                Matcher m = Util.HITPATTER.matcher(info);
+                                int x = -1;
+                                int y = -1;
+                                if (m.find()) {
+                                    x = Integer.parseInt(m.group(1));
+                                    y = Integer.parseInt(m.group(2));
+                                }
+
+                                Point p = new Point(x, y);
+                        
+                                if (Util.ifHitDownPlane(plane, p)) {
+                                    pw.println("hitResponse:" + x + ":" + y + ":2");
+                                } else if (Util.ifHitPlane(plane, p)) {
+                                    pw.println("hitResponse:" + x + ":" + y + ":1");
+                                } else {
+                                    pw.println("hitResponse:" + x + ":" + y + ":0");
+                                }
+                                gameDisplayComponent.enableComponent();
+                            } else if (Util.isHitResponseAction(info)) {
+                                chatDisplayArea.append("response from server" + info);
+                                Matcher m = Util.RESPONSEPATTERN.matcher(info);
+                                int x = -1, y = -1, result = -1;
+                                if (m.find()) {
+                                    x = Integer.parseInt(m.group(1));
+                                    y = Integer.parseInt(m.group(2));
+                                    result = Integer.parseInt(m.group(3));
+                                }
+                                Rectangle2D rectangle2D = new Rectangle2D.Double(x * 20 + 10, y * 20 + 10, 20, 20);
+                                switch (result) {
+                                    case 0: {
+                                        gameDisplayComponent.putRectangle(rectangle2D, Color.WHITE);
+                                        break;
+                                    }
+                                    case 1: {
+                                        gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
+                                        break;
+                                    }
+                                    case 2: {
+                                        gameDisplayComponent.putRectangle(rectangle2D, Color.BLUE);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                                gameDisplayComponent.repaint();
+                                gameDisplayComponent.disableComponent();
+                            }
+
                             chatDisplayArea.append("server:  " + info + "\r\n");
                         }
                     } catch (UnknownHostException e) {
