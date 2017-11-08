@@ -41,7 +41,7 @@ public class ShotPlaneClientFrame extends JFrame {
         chatInputWindow.getViewport().add(chatInputArea);
         chatInputArea.setLineWrap(true);
         chatDisplayArea.setLineWrap(true);
-        chatDisplayArea.setForeground(Color.BLACK);
+        chatDisplayArea.setDisabledTextColor(Color.BLACK);
 
         chatDisplayArea.setFont(new java.awt.Font("Dialog", 1, 14));
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -400,6 +400,10 @@ public class ShotPlaneClientFrame extends JFrame {
                     }
                 }
             }).start();
+            ipField.setEnabled(false);
+            portField.setEnabled(false);
+            ipField.setDisabledTextColor(Color.BLACK);
+            portField.setDisabledTextColor(Color.BLACK);
             connectButton.setEnabled(false);
         }
     }
