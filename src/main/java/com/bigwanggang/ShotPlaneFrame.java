@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 
 public class ShotPlaneFrame extends JFrame {
@@ -36,6 +37,7 @@ public class ShotPlaneFrame extends JFrame {
     public ShotPlaneFrame() {
         controlPanel = new JPanel();
         chatDisplayArea = new JTextArea(6, 6);
+        chatDisplayArea.setEnabled(false);
         chatInputArea = new JTextArea(6, 3);
         chatDisplayWindow = new JScrollPane();
         chatInputWindow = new JScrollPane();
@@ -43,13 +45,26 @@ public class ShotPlaneFrame extends JFrame {
         chatInputWindow.getViewport().add(chatInputArea);
         chatInputArea.setLineWrap(true);
         chatDisplayArea.setLineWrap(true);
-        chatDisplayArea.setForeground(Color.BLACK);
+        chatDisplayArea.setDisabledTextColor(Color.BLACK);
 
         chatDisplayArea.setFont(new java.awt.Font("Dialog", 1, 14));
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         gameDisplayComponent = new ShotPlaneDisplayConponent(plane);
         constraints = new GridBagConstraints();
         ipField = new JTextField(10);
+        InetAddress localhostAddress = null;
+        try {
+            localhostAddress = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        if (localhostAddress != null) {
+            ipField.setText(localhostAddress.getHostAddress());
+            ipField.setEnabled(false);
+            ipField.setDisabledTextColor(Color.BLACK);
+
+            ipField.setEditable(true);
+        }
         portField = new JTextField(10);
 
         JSplitPane up_down = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -296,6 +311,7 @@ public class ShotPlaneFrame extends JFrame {
                         gameDisplayComponent.addSquare(rectangle2D, new Color(54, 63, 61));
                     }
                 }
+
                 gameDisplayComponent.disablePlane();
                 gameDisplayComponent.repaint();
                 gameDisplayComponent.addPrintWirter(pw);
@@ -404,7 +420,8 @@ public class ShotPlaneFrame extends JFrame {
                     }
                 }).start();
                 serverIsOn = true;
-
+                portField.setEnabled(false);
+                portField.setDisabledTextColor(Color.BLACK);
                 connectButton.setEnabled(false);
             }
         }
