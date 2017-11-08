@@ -296,6 +296,7 @@ public class ShotPlaneFrame extends JFrame {
                 if (clientIsReady) {
                     pw.println("game begin");
                     chatDisplayArea.append("game begin\n");
+                    chatDisplayArea.setCaretPosition(chatDisplayArea.getDocument().getLength());
                 } else {
                     pw.println("server is ready");
                 }
@@ -330,10 +331,13 @@ public class ShotPlaneFrame extends JFrame {
 
                             while (true) {
                                 String info = br.readLine();
-                                if ("client is ready".equals(info))
+                                if ("client is ready".equals(info)) {
                                     clientIsReady = true;
-                                else if (Util.isHitAction(info)) {
-//                                    chatDisplayArea.append("hit from client" + info);
+                                    chatDisplayArea.append("Opponent is ready\n");
+                                } else if ("game begin".equals(info)) {
+                                    chatDisplayArea.append("Game begin!\n");
+                                    gameDisplayComponent.enableComponent();
+                                } else if (Util.isHitAction(info)) {
                                     Matcher m = Util.HITPATTER.matcher(info);
                                     int x = -1;
                                     int y = -1;
@@ -380,8 +384,9 @@ public class ShotPlaneFrame extends JFrame {
                                     }
                                     gameDisplayComponent.repaint();
                                     gameDisplayComponent.disableComponent();
-                                }
-//                                chatDisplayArea.append("client:" + info + "\r\n");
+                                } else
+                                    chatDisplayArea.append("client:" + info + "\r\n");
+                                chatDisplayArea.setCaretPosition(chatDisplayArea.getDocument().getLength());
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
