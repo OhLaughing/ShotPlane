@@ -290,8 +290,9 @@ public class ShotPlaneClientFrame extends JFrame {
                 gameDisplayComponent.repaint();
                 gameDisplayComponent.addPrintWirter(pw);
                 if (serverIsReady) {
-                    pw.println("game begin!");
+                    pw.println("game begin");
                     chatDisplayArea.append("game begin!\n");
+                    chatDisplayArea.setCaretPosition(chatDisplayArea.getDocument().getLength());
                     gameDisplayComponent.enableComponent();
                 } else {
                     pw.println("client is ready");
@@ -323,12 +324,13 @@ public class ShotPlaneClientFrame extends JFrame {
                         chatDisplayArea.append("put the plane and press OK Button to begin game\n");
                         while (true) {
                             String info = br.readLine();
-                            if ("server is ready".equals(info))
+                            if ("server is ready".equals(info)) {
                                 serverIsReady = true;
-                            else if ("game begin".equals(info))
+                                chatDisplayArea.append("Opponent is ready\n");
+                            } else if ("game begin".equals(info)) {
+                                chatDisplayArea.append("Game begin!\n");
                                 gameDisplayComponent.enableComponent();
-                            else if (Util.isHitAction(info)) {
-//                                chatDisplayArea.append("hit from server" + info + "\n");
+                            } else if (Util.isHitAction(info)) {
                                 Matcher m = Util.HITPATTER.matcher(info);
                                 int x = -1;
                                 int y = -1;
@@ -377,9 +379,10 @@ public class ShotPlaneClientFrame extends JFrame {
                                 }
                                 gameDisplayComponent.repaint();
                                 gameDisplayComponent.disableComponent();
-                            }
+                            } else
+                                chatDisplayArea.append("server:  " + info + "\r\n");
+                            chatDisplayArea.setCaretPosition(chatDisplayArea.getDocument().getLength());
 
-//                            chatDisplayArea.append("server:  " + info + "\r\n");
                         }
                     } catch (UnknownHostException e) {
                         e.printStackTrace();
