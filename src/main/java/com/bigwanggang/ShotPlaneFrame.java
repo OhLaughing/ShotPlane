@@ -31,6 +31,7 @@ public class ShotPlaneFrame extends JFrame {
     private boolean serverIsOn = false;
     private boolean clientIsReady = false;
     private JButton connectButton;
+    private JButton statusButton;
 
     public ShotPlaneFrame() {
         controlPanel = new JPanel();
@@ -102,6 +103,7 @@ public class ShotPlaneFrame extends JFrame {
 
     private void controlPanelInit() {
         controlPanel.setLayout(new GridLayout(1, 2));
+
         initDirectPanel();
         initIpPortInputPanel();
 
@@ -132,6 +134,10 @@ public class ShotPlaneFrame extends JFrame {
     private void initDirectPanel() {
         JPanel directionPanel = new JPanel();
         JButton leftButton = new JButton("Left");
+        statusButton = new JButton("");
+        statusButton.setEnabled(false);
+        statusButton.setBackground(Color.WHITE);
+
         JButton upButton = new JButton("Up");
         JButton downButton = new JButton("Down");
         JButton rightButton = new JButton("Right");
@@ -152,14 +158,15 @@ public class ShotPlaneFrame extends JFrame {
 
         directionPanel.setLayout(layout);
         constraints.anchor = GridBagConstraints.NORTH;
-        add(directionPanel, leftButton, constraints, 0, 1, 1, 1);
-        add(directionPanel, upButton, constraints, 1, 0, 1, 1);
-        add(directionPanel, downButton, constraints, 1, 2, 1, 1);
-        add(directionPanel, rightButton, constraints, 2, 1, 1, 1);
-        add(directionPanel, okButton, constraints, 1, 1, 1, 1);
+        add(directionPanel, statusButton, constraints, 0, 0, 1, 2);
+        add(directionPanel, leftButton, constraints, 2, 1, 1, 1);
+        add(directionPanel, upButton, constraints, 3, 0, 1, 1);
+        add(directionPanel, downButton, constraints, 3, 2, 1, 1);
+        add(directionPanel, rightButton, constraints, 4, 1, 1, 1);
+        add(directionPanel, okButton, constraints, 3, 1, 1, 1);
 
-        add(directionPanel, rotate1, constraints, 4, 0, 1, 1);
-        add(directionPanel, rotate2, constraints, 4, 2, 1, 1);
+        add(directionPanel, rotate1, constraints, 6, 0, 1, 1);
+        add(directionPanel, rotate2, constraints, 6, 2, 1, 1);
         controlPanel.add(directionPanel);
     }
 
@@ -336,7 +343,6 @@ public class ShotPlaneFrame extends JFrame {
                                     chatDisplayArea.append("Opponent is ready\n");
                                 } else if ("game begin".equals(info)) {
                                     chatDisplayArea.append("Game begin!\n");
-                                    gameDisplayComponent.enableComponent();
                                 } else if (Util.isHitAction(info)) {
                                     Matcher m = Util.HITPATTER.matcher(info);
                                     int x = -1;
@@ -354,6 +360,7 @@ public class ShotPlaneFrame extends JFrame {
                                         pw.println("hitResponse:" + x + ":" + y + ":0");
                                     }
                                     gameDisplayComponent.enableComponent();
+                                    statusButton.setBackground(Color.GREEN);
                                 } else if (Util.isHitResponseAction(info)) {
                                     Matcher m = Util.RESPONSEPATTERN.matcher(info);
                                     int x = -1, y = -1, result = -1;
@@ -384,6 +391,7 @@ public class ShotPlaneFrame extends JFrame {
                                     }
                                     gameDisplayComponent.repaint();
                                     gameDisplayComponent.disableComponent();
+                                    statusButton.setBackground(Color.WHITE);
                                 } else
                                     chatDisplayArea.append("client:" + info + "\r\n");
                                 chatDisplayArea.setCaretPosition(chatDisplayArea.getDocument().getLength());
