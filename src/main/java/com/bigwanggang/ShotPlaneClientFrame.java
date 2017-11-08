@@ -28,6 +28,7 @@ public class ShotPlaneClientFrame extends JFrame {
     private GridBagConstraints constraints;
     private PrintWriter pw;
     private JButton connectButton;
+    private JButton statusButton;
     private boolean serverIsReady = false;
 
     public ShotPlaneClientFrame() {
@@ -129,6 +130,10 @@ public class ShotPlaneClientFrame extends JFrame {
     private void initDirectPanel() {
         JPanel directionPanel = new JPanel();
         JButton leftButton = new JButton("Left");
+        statusButton = new JButton("");
+        statusButton.setEnabled(false);
+        statusButton.setBackground(Color.WHITE);
+
         JButton upButton = new JButton("Up");
         JButton downButton = new JButton("Down");
         JButton rightButton = new JButton("Right");
@@ -149,14 +154,15 @@ public class ShotPlaneClientFrame extends JFrame {
 
         directionPanel.setLayout(layout);
         constraints.anchor = GridBagConstraints.NORTH;
-        add(directionPanel, leftButton, constraints, 0, 1, 1, 1);
-        add(directionPanel, upButton, constraints, 1, 0, 1, 1);
-        add(directionPanel, downButton, constraints, 1, 2, 1, 1);
-        add(directionPanel, rightButton, constraints, 2, 1, 1, 1);
-        add(directionPanel, okButton, constraints, 1, 1, 1, 1);
+        add(directionPanel, statusButton, constraints, 0, 0, 1, 2);
+        add(directionPanel, leftButton, constraints, 2, 1, 1, 1);
+        add(directionPanel, upButton, constraints, 3, 0, 1, 1);
+        add(directionPanel, downButton, constraints, 3, 2, 1, 1);
+        add(directionPanel, rightButton, constraints, 4, 1, 1, 1);
+        add(directionPanel, okButton, constraints, 3, 1, 1, 1);
 
-        add(directionPanel, rotate1, constraints, 4, 0, 1, 1);
-        add(directionPanel, rotate2, constraints, 4, 2, 1, 1);
+        add(directionPanel, rotate1, constraints, 6, 0, 1, 1);
+        add(directionPanel, rotate2, constraints, 6, 2, 1, 1);
         controlPanel.add(directionPanel);
     }
 
@@ -294,6 +300,7 @@ public class ShotPlaneClientFrame extends JFrame {
                     chatDisplayArea.append("game begin!\n");
                     chatDisplayArea.setCaretPosition(chatDisplayArea.getDocument().getLength());
                     gameDisplayComponent.enableComponent();
+                    statusButton.setBackground(Color.GREEN);
                 } else {
                     pw.println("client is ready");
                 }
@@ -305,9 +312,6 @@ public class ShotPlaneClientFrame extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent event) {
-            System.out.println(event.getActionCommand());
-            System.out.println("ip:" + ipField.getText());
-            System.out.println("port:" + portField.getText());
             String ip = ipField.getText().trim();
 
             int port = Integer.parseInt(portField.getText().trim());
@@ -329,6 +333,7 @@ public class ShotPlaneClientFrame extends JFrame {
                                 chatDisplayArea.append("Opponent is ready\n");
                             } else if ("game begin".equals(info)) {
                                 chatDisplayArea.append("Game begin!\n");
+                                statusButton.setBackground(Color.GREEN);
                                 gameDisplayComponent.enableComponent();
                             } else if (Util.isHitAction(info)) {
                                 Matcher m = Util.HITPATTER.matcher(info);
@@ -348,7 +353,10 @@ public class ShotPlaneClientFrame extends JFrame {
                                 } else {
                                     pw.println("hitResponse:" + x + ":" + y + ":0");
                                 }
+
                                 gameDisplayComponent.enableComponent();
+                                statusButton.setBackground(Color.GREEN);
+
                             } else if (Util.isHitResponseAction(info)) {
                                 Matcher m = Util.RESPONSEPATTERN.matcher(info);
                                 int x = -1, y = -1, result = -1;
@@ -379,10 +387,11 @@ public class ShotPlaneClientFrame extends JFrame {
                                 }
                                 gameDisplayComponent.repaint();
                                 gameDisplayComponent.disableComponent();
-                            } else
+                                statusButton.setBackground(Color.WHITE);
+                            } else {
                                 chatDisplayArea.append("server:  " + info + "\r\n");
+                            }
                             chatDisplayArea.setCaretPosition(chatDisplayArea.getDocument().getLength());
-
                         }
                     } catch (UnknownHostException e) {
                         e.printStackTrace();
@@ -392,7 +401,6 @@ public class ShotPlaneClientFrame extends JFrame {
                 }
             }).start();
             connectButton.setEnabled(false);
-            System.out.println("connect button disable");
         }
     }
 }
