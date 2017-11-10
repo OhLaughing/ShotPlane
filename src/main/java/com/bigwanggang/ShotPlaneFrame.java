@@ -247,7 +247,7 @@ public class ShotPlaneFrame extends JFrame {
                 if (head.getX() == tail.getX() && head.getY() < tail.getY()) {
                     double x1 = head.getX() - 1;
                     double y = head.getY() + 1;
-                    double x2 = tail.getX() + 1;
+                    double x2 = tail.getX() + 2;
                     if (y == 1) y++;
                     plane = new Plane(x1, y, x2, y);
                 } else if (head.getX() == tail.getX() && head.getY() > tail.getY()) {
